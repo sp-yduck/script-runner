@@ -45,3 +45,9 @@ tasks:
 ```
 go run main.go
 ```
+
+## Roadmap
+- [ ] run multiple pipelines in parallel
+- [ ] save output in files & reduce std output
+- [ ] be able to configure running parameters
+- [ ] add more feature to Tasks/Pipelines (e.g. ignore_error)
