@@ -22,8 +22,8 @@ func main() {
 		if err != nil {
 			log.Fatal("cannot get absolution path: ", err)
 		}
-		pipeline := readPipeline(absScriptPath)
-		pipelines = append(pipelines, pipeline)
+		pipeline := readPipelines(absScriptPath)
+		pipelines = append(pipelines, pipeline...)
 	}
 
 	// run pipelines

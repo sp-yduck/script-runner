@@ -7,11 +7,12 @@
   - name: echo kubectl path
     command: echo $KUBECTL
 
+- name: pipeline 2
+  tasks:
   - name: helm
     command: which helm
 
-  - name: echo kubectl path
-    command: echo $KUBECTL
-
+- name: pipeline3
+  tasks:
   - name: fail task
-  command: kubectl get node
+    command: echo $KUBECTL

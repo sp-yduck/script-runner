@@ -23,16 +23,16 @@ type Task struct {
 }
 
 // unmarshal pipeline object from filepath
-func readPipeline(path string) (pipeline Pipeline) {
+func readPipelines(path string) (pipelines []Pipeline) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal("cannot read file: ", err)
 	}
-	err = yaml.Unmarshal(b, &pipeline)
+	err = yaml.Unmarshal(b, &pipelines)
 	if err != nil {
 		log.Fatal("cannot unmarshal yaml: ", err)
 	}
-	return pipeline
+	return pipelines
 }
 
 // run single pipeline
