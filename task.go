@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -20,6 +22,7 @@ type Task struct {
 	Name         string `yaml:"name"`
 	Command      string `yaml:"command"`
 	ExportOutput string `yaml:"export_output,omitempty"`
+	Timeout      int64  `yaml:"timeout"`
 }
 
 // unmarshal pipeline object from filepath
@@ -41,19 +44,44 @@ func runPipeline(p Pipeline) (err error) {
 	variables := os.Environ()
 	for i, task := range p.Tasks {
 		fmt.Println(fmt.Sprintf("\n----- task | %s -----", task.Name))
-		scriptCmd := exec.Command("sh", "-c", task.Command)
+
+		// prepare timeout
+		var scriptCmd *exec.Cmd
+		timeout := time.Duration(defaultTimeout)
+		// overwrite time out
+		if task.Timeout != 0 {
+			timeout = time.Duration(task.Timeout)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+		defer cancel()
+		scriptCmd = exec.CommandContext(ctx, "sh", "-c", task.Command)
+
+		// set env var
 		scriptCmd.Env = variables
+
+		// prepare results
 		var scriptStdErr bytes.Buffer
 		scriptCmd.Stderr = &scriptStdErr
+		var output bytes.Buffer
+		scriptCmd.Stdout = &output
 
-		output, err := scriptCmd.Output()
-		if task.ExportOutput != "" {
-			variables = append(variables, fmt.Sprintf("%s=%s", task.ExportOutput, string(output)))
+		// exec command
+		ch := make(chan error)
+		go func() {
+			ch <- scriptCmd.Run()
+		}()
+		select {
+		case err = <-ch:
+		case <-ctx.Done():
+			err = fmt.Errorf("context deadline exeeded: timeout is set to %s", timeout*time.Second)
 		}
-
-		fmt.Print(fmt.Sprintf("    command: %s\n    output: ", task.Command), string(output))
+		// output results
+		if task.ExportOutput != "" {
+			variables = append(variables, fmt.Sprintf("%s=%s", task.ExportOutput, output.String()))
+		}
+		fmt.Printf("    command: %s\n    output: %s\n", task.Command, output.String())
 		if err != nil {
-			fmt.Print("    stderr: ", scriptStdErr.String())
+			fmt.Println("    stderr: ", scriptStdErr.String())
 			fmt.Println("    err: ", err)
 			log.Println("executed command: ", scriptCmd.String())
 			log.Println("task exit with error: ", err)

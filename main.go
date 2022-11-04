@@ -6,6 +6,12 @@ import (
 	"path/filepath"
 )
 
+var defaultTimeout int64
+
+func init() {
+	defaultTimeout = 5
+}
+
 func main() {
 	baseDir := "./pipelines"
 	files, err := os.ReadDir(baseDir)

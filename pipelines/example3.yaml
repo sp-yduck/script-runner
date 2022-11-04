@@ -16,3 +16,15 @@
   tasks:
   - name: fail task
     command: echo $KUBECTL
+
+- name: pipeline 4
+  tasks:
+  - name: sleep 10 sec
+    command: sleep 10
+    timeout: 2  # will fail after 2 sec
+    
+- name: pipeline 5
+  tasks:
+  - name: sleep 30 sec
+    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
+    
