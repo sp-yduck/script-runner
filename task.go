@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -45,27 +46,6 @@ func readTask(path string) (task Task) {
 	return task
 }
 
-// run single task
-// func runTask(task Task) (err error) {
-// 	fmt.Println(fmt.Sprintf("----- task | %s -----", task.Name))
-// 	for i, cmd := range task.Command {
-// 		scriptCmd := exec.Command("sh", "-c", cmd)
-// 		var scriptStdErr bytes.Buffer
-// 		scriptCmd.Stderr = &scriptStdErr
-// 		output, err := scriptCmd.Output()
-// 		fmt.Println(fmt.Sprintf("%s\n    output: ", cmd), string(output))
-// 		if err != nil {
-// 			fmt.Println("    stderr: ", scriptStdErr.String())
-// 			fmt.Println("    err: ", err)
-// 			// log.Println("executed command: ", scriptCmd.String())
-// 			fmt.Printf("remaining command: %s\n", task.Command[i:])
-// 			return err
-// 		}
-// 	}
-// 	fmt.Printf("task (%s) completed\n", task.Name)
-// 	return nil
-// }
-
 func runPipeline(p Pipeline) (err error) {
 	fmt.Printf("----- pipeline | %s -----", p.Name)
 	variables := os.Environ()
@@ -87,9 +67,16 @@ func runPipeline(p Pipeline) (err error) {
 			fmt.Println("    err: ", err)
 			log.Println("executed command: ", scriptCmd.String())
 			log.Println("task exit with error: ", err)
-			log.Printf("remaining tasks: %v\n", p.Tasks[i:])
+			log.Printf("remaining tasks: %v\n", filepath.Join(getTasksName(p.Tasks[i:])...))
 			return err
 		}
 	}
 	return nil
+}
+
+func getTasksName(tasks []Task) (names []string) {
+	for _, t := range tasks {
+		names = append(names, t.Name)
+	}
+	return names
 }
