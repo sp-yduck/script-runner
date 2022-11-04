@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,8 +29,14 @@ func main() {
 
 	// run pipelines
 	for _, p := range pipelines {
-		for _, task := range p.Tasks {
-			_ = runTask(task)
+		fmt.Printf("----- pipeline | %s -----\n", p.Name)
+		for i, task := range p.Tasks {
+			err = runTask(task)
+			if err != nil {
+				log.Println("task exit with error: ", err)
+				fmt.Printf("remaining tasks: %v\n", p.Tasks[i:])
+				break
+			}
 		}
 	}
 }

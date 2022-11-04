@@ -16,7 +16,7 @@ type Pipeline struct {
 }
 
 type Task struct {
-	Name    string   `yaml:"name,omitempty"`
+	Name    string   `yaml:"name"`
 	Command []string `yaml:"command"`
 }
 
@@ -47,7 +47,7 @@ func readTask(path string) (task Task) {
 // run single task
 func runTask(task Task) (err error) {
 	fmt.Println(fmt.Sprintf("----- task | %s -----", task.Name))
-	for _, cmd := range task.Command {
+	for i, cmd := range task.Command {
 		scriptCmd := exec.Command("sh", "-c", cmd)
 		var scriptStdErr bytes.Buffer
 		scriptCmd.Stderr = &scriptStdErr
@@ -57,8 +57,10 @@ func runTask(task Task) (err error) {
 			fmt.Println("    stderr: ", scriptStdErr.String())
 			fmt.Println("    err: ", err)
 			// log.Println("executed command: ", scriptCmd.String())
+			fmt.Printf("remaining command: %s\n", task.Command[i:])
 			return err
 		}
 	}
+	fmt.Printf("task (%s) completed\n", task.Name)
 	return nil
 }
