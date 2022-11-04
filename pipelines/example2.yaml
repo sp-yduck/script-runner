@@ -1,5 +1,4 @@
 name: example pipeline 2
 tasks:
 - name: hello world
-  command: 
-  - echo 'hello world'
+  command: echo 'hello world'

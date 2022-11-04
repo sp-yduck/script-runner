@@ -1,15 +1,17 @@
 name: example pipeline
 tasks:
-- name: kubectl
-  command:
-  - which kubectl
-  - kubectl version
+- name: check kubectl path
+  command: which kubectl
+  export_output: KUBECTL
+
+- name: echo kubectl path
+  command: echo $KUBECTL
 
 - name: helm
-  command:
-  - which helm
-  - helm version
+  command: which helm
+
+- name: echo kubectl path
+  command: echo $KUBECTL
 
 - name: fail task
-  command:
-  - kubectl get node
+  command: kubectl get node
