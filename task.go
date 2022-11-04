@@ -22,6 +22,7 @@ type Task struct {
 	ExportOutput string `yaml:"export_output,omitempty"`
 }
 
+// unmarshal pipeline object from filepath
 func readPipeline(path string) (pipeline Pipeline) {
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -34,18 +35,7 @@ func readPipeline(path string) (pipeline Pipeline) {
 	return pipeline
 }
 
-func readTask(path string) (task Task) {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = yaml.Unmarshal(b, &task)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return task
-}
-
+// run single pipeline
 func runPipeline(p Pipeline) (err error) {
 	fmt.Printf("----- pipeline | %s -----", p.Name)
 	variables := os.Environ()
@@ -74,6 +64,7 @@ func runPipeline(p Pipeline) (err error) {
 	return nil
 }
 
+// get all of the tasks name inputed as slice
 func getTasksName(tasks []Task) (names []string) {
 	for _, t := range tasks {
 		names = append(names, t.Name)

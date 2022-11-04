@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+
+	"gopkg.in/yaml.v3"
 )
 
 // run single script
@@ -21,4 +24,16 @@ func runScript(name string) (err error) {
 		return err
 	}
 	return nil
+}
+
+func readTask(path string) (task Task) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = yaml.Unmarshal(b, &task)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return task
 }
