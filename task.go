@@ -67,6 +67,7 @@ func runPipeline(p Pipeline) (err error) {
 
 		// exec command
 		ch := make(chan error)
+		defer close(ch)
 		go func() {
 			ch <- scriptCmd.Run()
 		}()
@@ -75,6 +76,7 @@ func runPipeline(p Pipeline) (err error) {
 		case <-ctx.Done():
 			err = fmt.Errorf("context deadline exeeded: timeout is set to %s", timeout*time.Second)
 		}
+
 		// output results
 		if task.ExportOutput != "" {
 			variables = append(variables, fmt.Sprintf("%s=%s", task.ExportOutput, output.String()))
