@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,7 +38,17 @@ func main() {
 	}
 
 	// run pipelines
+	// to do: pipelineごとに出力ファイル分ける
+	// stdout,stderrが複数のpipelineのものでごっちゃにならないようにする
+	ch := make(chan error, len(pipelines))
+	defer close(ch)
 	for _, p := range pipelines {
-		runPipeline(p)
+		go func(p Pipeline) {
+			ch <- runPipeline(p)
+		}(p)
+	}
+
+	for i := 0; i < len(pipelines); i++ {
+		fmt.Println(<-ch)
 	}
 }

@@ -28,3 +28,22 @@
   - name: sleep 30 sec
     command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
     
+- name: pipeline 5
+  tasks:
+  - name: sleep 30 sec
+    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
+
+- name: pipeline 5
+  tasks:
+  - name: sleep 30 sec
+    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
+
+- name: pipeline 5
+  tasks:
+  - name: sleep 30 sec
+    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
+
+- name: pipeline 5
+  tasks:
+  - name: sleep 30 sec
+    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
