@@ -7,12 +7,16 @@ import (
 )
 
 var defaultTimeout int64
+var defaultLogdir string
 
 func init() {
 	defaultTimeout = 5
+	defaultLogdir = "./log"
 }
 
 func main() {
+	logInit(defaultLogdir)
+
 	baseDir := "./pipelines"
 	files, err := os.ReadDir(baseDir)
 	if err != nil {

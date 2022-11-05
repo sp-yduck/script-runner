@@ -47,6 +47,8 @@ go run main.go
 - [ ] save output in files & reduce std output
 - [x] can configure timeout
 - [ ] be able to configure running parameters (e.g. output verbosity, timeout seconds)
+- [x] output log to files
+- [ ] enrich log information (e.g. struct, log level)
 - [ ] add more feature to Tasks/Pipelines (e.g. ignore_error)
 - [x] register output to variables
 - [ ] become a CLI
