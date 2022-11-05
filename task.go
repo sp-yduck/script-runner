@@ -54,7 +54,7 @@ func runPipeline(p Pipeline) (err error) {
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 		defer cancel()
-		scriptCmd = exec.CommandContext(ctx, "sh", "-c", task.Command)
+		scriptCmd = exec.Command("sh", "-c", task.Command)
 
 		// set env var
 		scriptCmd.Env = variables
