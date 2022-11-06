@@ -43,10 +43,10 @@ go run main.go
 ```
 
 ## Roadmap
-- [ ] run multiple pipelines in parallel
+- [x] run multiple pipelines in parallel
 - [ ] save output in files & reduce std output
-- [x] can configure timeout
-- [ ] be able to configure running parameters (e.g. output verbosity, timeout seconds)
+- [x] add timeout feature
+- [ ] be able to configure running parameters by config file (e.g. log level, timeout)
 - [x] output log to files
 - [ ] enrich log information (e.g. struct, log level)
 - [ ] add more feature to Tasks/Pipelines (e.g. ignore_error)
