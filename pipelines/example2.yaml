@@ -1,4 +1,7 @@
 - name: example pipeline 2
   tasks:
+  - name: fail task
+    command: kubectl get node
+
   - name: hello world
     command: echo 'hello world'

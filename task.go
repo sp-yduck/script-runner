@@ -7,14 +7,15 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
 type Pipeline struct {
-	Name  string `yaml:"name"`
-	Tasks []Task `yaml:"tasks"`
+	Name  string  `yaml:"name"`
+	Tasks []*Task `yaml:"tasks"`
 }
 
 type Task struct {
@@ -22,12 +23,13 @@ type Task struct {
 	Command      string `yaml:"command"`
 	ExportOutput string `yaml:"export_output,omitempty"`
 	Timeout      int64  `yaml:"timeout,omitempty"`
-	Result       TaskResult
+	Result       *TaskResult
 }
 
 type TaskResult struct {
 	Stdout string
 	Stderr string
+	State  int
 	Err    error
 }
 
@@ -87,18 +89,20 @@ func (p *Pipeline) Run() (err error) {
 		if task.ExportOutput != "" {
 			variables = append(variables, fmt.Sprintf("%s=%s", task.ExportOutput, scriptStdOut.String()))
 		}
-		task.Result.Stdout = scriptStdOut.String()
-		task.Result.Stderr = scriptStdErr.String()
-		task.Result.Err = err
+		task.Result = &TaskResult{
+			Stdout: strings.TrimSuffix(scriptStdOut.String(), "\n"),
+			Stderr: strings.TrimSuffix(scriptStdErr.String(), "\n"),
+			State:  scriptCmd.ProcessState.ExitCode(),
+			Err:    err,
+		}
 
 		// print result
-		fmt.Println(task.Conclude())
 		if err != nil {
-			// fmt.Println(p.Conclude())
+			fmt.Println(p.Conclude())
 			return err
 		}
 	}
-	// fmt.Println(p.Conclude())
+	fmt.Println(p.Conclude())
 	return nil
 }
 
@@ -110,18 +114,23 @@ func getTasksName(tasks []Task) (names []string) {
 	return names
 }
 
-func getRemainingTasks(pipeline Pipeline) (tasks []Task) {
-	for i, t := range pipeline.Tasks {
-		if t.Result.Err != nil {
-			return pipeline.Tasks[i:]
-		}
-	}
-	return
-}
+// func getRemainingTasks(pipeline Pipeline) (tasks []Task) {
+// 	for i, t := range pipeline.Tasks {
+// 		if t.Result.Err != nil {
+// 			return pipeline.Tasks[i:]
+// 		}
+// 	}
+// 	return
+// }
 
 func (task *Task) Conclude() (summary string) {
-	summary = fmt.Sprintf("----- task | %s -----\n", task.Name)
+	// if the task was not executed due to a previous task failure
+	if task.Result == nil {
+		return
+	}
+	summary = fmt.Sprintf("\n----- task | %s -----\n", task.Name)
 	summary += fmt.Sprintf("    command: %s\n    output: %s\n", task.Command, task.Result.Stdout)
+	summary += fmt.Sprintf("    exit status: %d\n", task.Result.State)
 	if task.Result.Err != nil {
 		summary += fmt.Sprintf("    stderr: %s\n", task.Result.Stderr)
 		summary += fmt.Sprintf("    err: %v\n", task.Result.Err)
@@ -133,7 +142,7 @@ func (task *Task) Conclude() (summary string) {
 }
 
 func (p *Pipeline) Conclude() (summary string) {
-	summary = fmt.Sprintf("----- pipeline | %s -----\n", p.Name)
+	summary = fmt.Sprintf("========== pipeline | %s ==========\n", p.Name)
 	for _, task := range p.Tasks {
 		summary += task.Conclude()
 	}
