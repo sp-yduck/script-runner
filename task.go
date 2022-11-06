@@ -134,8 +134,6 @@ func (task *Task) Conclude() (summary string) {
 	if task.Result.Err != nil {
 		summary += fmt.Sprintf("    stderr: %s\n", task.Result.Stderr)
 		summary += fmt.Sprintf("    err: %v\n", task.Result.Err)
-		summary += fmt.Sprintf("executed command: sh -c %s\n", task.Command)
-		// summary += fmt.Sprintf("task exit with error: %v\n", task.Result.Err)
 		// summary += fmt.Sprintf("remaining tasks: %v\n", filepath.Join(getTasksName(task.Result.RemainingTasks)...))
 	}
 	return summary
