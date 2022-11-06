@@ -10,8 +10,11 @@ import (
 
 func logInit(logdir string, verbosity int8) {
 	// prepare log directory
-	if err := os.Mkdir(logdir, 0666); err != nil {
-		log.Println("cannot make new dir: ", err)
+	if _, err := os.Stat(logdir); err != nil {
+		// make new dir
+		if err := os.Mkdir(logdir, 0666); err != nil {
+			log.Println("cannot make new dir: ", err)
+		}
 	}
 
 	// configure log file name format

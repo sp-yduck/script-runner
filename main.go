@@ -23,7 +23,8 @@ func main() {
 	baseDir := "./pipelines"
 	files, err := os.ReadDir(baseDir)
 	if err != nil {
-		log.Fatalf("cannot read directory '%s': ", baseDir)
+		fmt.Printf("cannot read directory '%s': %v\n", baseDir, err)
+		log.Fatalf("cannot read directory '%s': %v\n", baseDir, err)
 	}
 
 	// read pipelines
@@ -33,6 +34,7 @@ func main() {
 		relScriptPath := filepath.Join(baseDir, f.Name())
 		absScriptPath, err := filepath.Abs(relScriptPath)
 		if err != nil {
+			fmt.Println("cannot get absolution path: ", err)
 			log.Fatal("cannot get absolution path: ", err)
 		}
 		pipeline := readPipelines(absScriptPath)
@@ -48,6 +50,7 @@ func main() {
 		}(p)
 	}
 
+	// to do: get result in order for finished pipeline
 	for _, p := range pipelines {
 		if err := <-ch; err != nil {
 			log.Println(fmt.Sprintf("pipeline(%s) failed: ", p.Name), err)

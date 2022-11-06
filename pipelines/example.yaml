@@ -14,4 +14,4 @@
     command: echo $KUBECTL
 
   - name: fail task
-  command: kubectl get node
+    command: kubectl get node
