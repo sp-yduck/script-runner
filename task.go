@@ -23,6 +23,14 @@ type Task struct {
 	Command      string `yaml:"command"`
 	ExportOutput string `yaml:"export_output,omitempty"`
 	Timeout      int64  `yaml:"timeout"`
+	Result       TaskResult
+}
+
+type TaskResult struct {
+	Stdout         string
+	Stderr         string
+	Err            error
+	RemainingTasks []Task
 }
 
 // unmarshal pipeline object from filepath
@@ -40,11 +48,8 @@ func readPipelines(path string) (pipelines []Pipeline) {
 
 // run single pipeline
 func runPipeline(p Pipeline) (err error) {
-	fmt.Printf("----- pipeline | %s -----", p.Name)
 	variables := os.Environ()
-	for i, task := range p.Tasks {
-		fmt.Println(fmt.Sprintf("\n----- task | %s -----", task.Name))
-
+	for _, task := range p.Tasks {
 		// prepare timeout
 		var scriptCmd *exec.Cmd
 		timeout := time.Duration(defaultTimeout)
@@ -81,15 +86,21 @@ func runPipeline(p Pipeline) (err error) {
 		if task.ExportOutput != "" {
 			variables = append(variables, fmt.Sprintf("%s=%s", task.ExportOutput, output.String()))
 		}
-		fmt.Printf("    command: %s\n    output: %s\n", task.Command, output.String())
+		// fmt.Printf("    command: %s\n    output: %s\n", task.Command, output.String())
+		task.Result.Stdout = output.String()
+		task.Result.Stderr = scriptStdErr.String()
+		task.Result.Err = err
+		fmt.Println("check this error: ", err)
+		concludeTask(task)
 		if err != nil {
-			fmt.Println("    stderr: ", scriptStdErr.String())
-			fmt.Println("    err: ", err)
-			log.Println("executed command: ", scriptCmd.String())
-			log.Println("task exit with error: ", err)
-			log.Printf("remaining tasks: %v\n", filepath.Join(getTasksName(p.Tasks[i:])...))
+			// fmt.Println("    stderr: ", scriptStdErr.String())
+			// fmt.Println("    err: ", err)
+			// log.Println("executed command: ", scriptCmd.String())
+			// log.Println("task exit with error: ", err)
+			// log.Printf("remaining tasks: %v\n", filepath.Join(getTasksName(p.Tasks[i:])...))
 			return err
 		}
+
 	}
 	return nil
 }
@@ -100,4 +111,17 @@ func getTasksName(tasks []Task) (names []string) {
 		names = append(names, t.Name)
 	}
 	return names
+}
+
+func concludeTask(task Task) {
+	summary := fmt.Sprintf("----- task | %s -----\n", task.Name)
+	summary += fmt.Sprintf("    command: %s\n    output: %s\n", task.Command, task.Result.Stdout)
+	if task.Result.Err != nil {
+		summary += fmt.Sprintf("    stderr: %s\n", task.Result.Stderr)
+		summary += fmt.Sprintf("    err: %v\n", task.Result.Err)
+		summary += fmt.Sprintf("executed command: sh -c %s\n", task.Command)
+		// summary += fmt.Sprintf("task exit with error: %v\n", task.Result.Err)
+		summary += fmt.Sprintf("remaining tasks: %v\n", filepath.Join(getTasksName(task.Result.RemainingTasks)...))
+	}
+	fmt.Println(summary)
 }

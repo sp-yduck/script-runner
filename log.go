@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func logInit(logdir string) {
+func logInit(logdir string, verbosity int8) {
 	// prepare log directory
 	if err := os.Mkdir(logdir, 0666); err != nil {
 		log.Println("cannot make new dir: ", err)
@@ -23,9 +23,17 @@ func logInit(logdir string) {
 	if err != nil {
 		log.Println("cannot open file: ", err)
 	}
-	logfile := io.MultiWriter(os.Stdout, file)
+
+	// configure log output files
+	var logfiles io.Writer
+	switch verbosity {
+	case 0:
+		logfiles = io.MultiWriter(file)
+	default:
+		logfiles = io.MultiWriter(os.Stdout, file)
+	}
 
 	// configure log
 	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
-	log.SetOutput(logfile)
+	log.SetOutput(logfiles)
 }
