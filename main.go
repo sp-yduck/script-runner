@@ -40,7 +40,6 @@ func main() {
 	}
 
 	// run pipelines
-	// to do: pipelineごとに出力ファイル分ける
 	ch := make(chan error, len(pipelines))
 	defer close(ch)
 	for _, p := range pipelines {
