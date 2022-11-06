@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -27,10 +26,9 @@ type Task struct {
 }
 
 type TaskResult struct {
-	Stdout         string
-	Stderr         string
-	Err            error
-	RemainingTasks []Task
+	Stdout string
+	Stderr string
+	Err    error
 }
 
 // unmarshal pipeline object from filepath
@@ -94,11 +92,13 @@ func runPipeline(p Pipeline) (err error) {
 		task.Result.Err = err
 
 		// print result
-		concludeTask(task)
+		// fmt.Println(concludeTask(task))
 		if err != nil {
+			fmt.Println(concludePipeline(p))
 			return err
 		}
 	}
+	fmt.Println(concludePipeline(p))
 	return nil
 }
 
@@ -110,15 +110,32 @@ func getTasksName(tasks []Task) (names []string) {
 	return names
 }
 
-func concludeTask(task Task) {
-	summary := fmt.Sprintf("----- task | %s -----\n", task.Name)
+func getRemainingTasks(pipeline Pipeline) (tasks []Task) {
+	for i, t := range pipeline.Tasks {
+		if t.Result.Err != nil {
+			return pipeline.Tasks[i:]
+		}
+	}
+	return
+}
+
+func concludeTask(task Task) (summary string) {
+	summary = fmt.Sprintf("----- task | %s -----\n", task.Name)
 	summary += fmt.Sprintf("    command: %s\n    output: %s\n", task.Command, task.Result.Stdout)
 	if task.Result.Err != nil {
 		summary += fmt.Sprintf("    stderr: %s\n", task.Result.Stderr)
 		summary += fmt.Sprintf("    err: %v\n", task.Result.Err)
 		summary += fmt.Sprintf("executed command: sh -c %s\n", task.Command)
 		// summary += fmt.Sprintf("task exit with error: %v\n", task.Result.Err)
-		summary += fmt.Sprintf("remaining tasks: %v\n", filepath.Join(getTasksName(task.Result.RemainingTasks)...))
+		// summary += fmt.Sprintf("remaining tasks: %v\n", filepath.Join(getTasksName(task.Result.RemainingTasks)...))
 	}
-	fmt.Println(summary)
+	return summary
+}
+
+func concludePipeline(pipeline Pipeline) (summary string) {
+	summary = fmt.Sprintf("----- pipeline | %s -----\n", pipeline.Name)
+	for _, task := range pipeline.Tasks {
+		summary += concludeTask(task)
+	}
+	return summary
 }
