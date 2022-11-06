@@ -52,15 +52,10 @@ func readPipelines(path string) (pipelines []Pipeline) {
 func (p *Pipeline) Run() (err error) {
 	variables := os.Environ()
 	for _, task := range p.Tasks {
-		// prepare timeout
+		// set timeout context & command
 		var scriptCmd *exec.Cmd
-		timeout := time.Duration(defaultTimeout)
-		if task.Timeout != 0 {
-			timeout = time.Duration(task.Timeout)
-		}
-
-		// set context&command
-		ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+		timeout := task.GetTimeout()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 		defer cancel()
 		scriptCmd = exec.Command("sh", "-c", task.Command)
 
@@ -82,7 +77,6 @@ func (p *Pipeline) Run() (err error) {
 		select {
 		case err = <-ch:
 		case <-ctx.Done():
-			err = fmt.Errorf("context deadline exeeded: timeout is set to %s", timeout*time.Second)
 		}
 
 		// output results
@@ -123,6 +117,14 @@ func getTasksName(tasks []Task) (names []string) {
 // 	return
 // }
 
+func (task *Task) GetTimeout() (timeout int64) {
+	timeout = defaultTimeout
+	if task.Timeout != 0 {
+		timeout = task.Timeout
+	}
+	return
+}
+
 func (task *Task) Conclude() (summary string) {
 	// if the task was not executed due to a previous task failure
 	if task.Result == nil {
@@ -135,6 +137,9 @@ func (task *Task) Conclude() (summary string) {
 		summary += fmt.Sprintf("    stderr: %s\n", task.Result.Stderr)
 		summary += fmt.Sprintf("    err: %v\n", task.Result.Err)
 		// summary += fmt.Sprintf("remaining tasks: %v\n", filepath.Join(getTasksName(task.Result.RemainingTasks)...))
+	}
+	if task.Result.State == -1 {
+		summary += fmt.Sprintf("[ERROR] this task has been killed due to exeeding timout (%d seconds)", task.GetTimeout())
 	}
 	return summary
 }
