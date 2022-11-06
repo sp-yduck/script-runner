@@ -54,18 +54,16 @@ func (p *Pipeline) Run() (err error) {
 	for _, task := range p.Tasks {
 		// set timeout context & command
 		var scriptCmd *exec.Cmd
+		var scriptStdErr bytes.Buffer
+		var scriptStdOut bytes.Buffer
 		timeout := task.GetTimeout()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 		defer cancel()
 		scriptCmd = exec.Command("sh", "-c", task.Command)
 
-		// set env var
+		// set env var / std output
 		scriptCmd.Env = variables
-
-		// prepare results
-		var scriptStdErr bytes.Buffer
 		scriptCmd.Stderr = &scriptStdErr
-		var scriptStdOut bytes.Buffer
 		scriptCmd.Stdout = &scriptStdOut
 
 		// exec command
@@ -126,8 +124,8 @@ func (task *Task) GetTimeout() (timeout int64) {
 }
 
 func (task *Task) Conclude() (summary string) {
-	// if the task was not executed due to a previous task failure
 	if task.Result == nil {
+		// this runs if the task was not executed due to a previous task failure
 		return
 	}
 	summary = fmt.Sprintf("\n----- task | %s -----\n", task.Name)
