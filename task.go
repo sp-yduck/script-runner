@@ -47,7 +47,7 @@ func readPipelines(path string) (pipelines []Pipeline) {
 }
 
 // run single pipeline
-func runPipeline(p Pipeline) (err error) {
+func (p *Pipeline) Run() (err error) {
 	variables := os.Environ()
 	for _, task := range p.Tasks {
 		// prepare timeout
@@ -92,13 +92,13 @@ func runPipeline(p Pipeline) (err error) {
 		task.Result.Err = err
 
 		// print result
-		// fmt.Println(concludeTask(task))
+		fmt.Println(task.Conclude())
 		if err != nil {
-			fmt.Println(concludePipeline(p))
+			// fmt.Println(p.Conclude())
 			return err
 		}
 	}
-	fmt.Println(concludePipeline(p))
+	// fmt.Println(p.Conclude())
 	return nil
 }
 
@@ -119,7 +119,7 @@ func getRemainingTasks(pipeline Pipeline) (tasks []Task) {
 	return
 }
 
-func concludeTask(task Task) (summary string) {
+func (task *Task) Conclude() (summary string) {
 	summary = fmt.Sprintf("----- task | %s -----\n", task.Name)
 	summary += fmt.Sprintf("    command: %s\n    output: %s\n", task.Command, task.Result.Stdout)
 	if task.Result.Err != nil {
@@ -132,10 +132,10 @@ func concludeTask(task Task) (summary string) {
 	return summary
 }
 
-func concludePipeline(pipeline Pipeline) (summary string) {
-	summary = fmt.Sprintf("----- pipeline | %s -----\n", pipeline.Name)
-	for _, task := range pipeline.Tasks {
-		summary += concludeTask(task)
+func (p *Pipeline) Conclude() (summary string) {
+	summary = fmt.Sprintf("----- pipeline | %s -----\n", p.Name)
+	for _, task := range p.Tasks {
+		summary += task.Conclude()
 	}
 	return summary
 }

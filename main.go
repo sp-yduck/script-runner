@@ -46,7 +46,7 @@ func main() {
 	defer close(ch)
 	for _, p := range pipelines {
 		go func(p Pipeline) {
-			ch <- runPipeline(p)
+			ch <- p.Run()
 		}(p)
 	}
 
