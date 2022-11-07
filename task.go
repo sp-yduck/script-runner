@@ -137,7 +137,7 @@ func (task *Task) Conclude() (summary string) {
 		// summary += fmt.Sprintf("remaining tasks: %v\n", filepath.Join(getTasksName(task.Result.RemainingTasks)...))
 	}
 	if task.Result.State == -1 {
-		summary += fmt.Sprintf("[ERROR] this task has been killed due to exeeding timout (%d seconds)", task.GetTimeout())
+		summary += fmt.Sprintf("[ERROR] this task has been killed due to exeeding timout (%d seconds)\n", task.GetTimeout())
 	}
 	return summary
 }

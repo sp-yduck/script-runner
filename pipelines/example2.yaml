@@ -1,5 +1,8 @@
 - name: example pipeline 2
   tasks:
+  - name: hello world script
+    command: ./scripts/hello_world.sh
+    
   - name: fail task
     command: kubectl get node
 
