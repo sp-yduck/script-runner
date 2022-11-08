@@ -90,11 +90,17 @@ func (p *Pipeline) Run() (err error) {
 
 		// print result
 		if err != nil {
-			fmt.Println(p.Conclude())
+			summary := p.Conclude()
+			fmt.Println(summary)
+			mkdir("./result")
+			createResult(summary, "./result/"+p.Name)
 			return err
 		}
 	}
-	fmt.Println(p.Conclude())
+	summary := p.Conclude()
+	fmt.Println(summary)
+	mkdir("./result")
+	createResult(summary, "./result/"+p.Name)
 	return nil
 }
 
@@ -148,4 +154,25 @@ func (p *Pipeline) Conclude() (summary string) {
 		summary += task.Conclude()
 	}
 	return summary
+}
+
+func createResult(input string, dstPath string) {
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		log.Println("cannot create new file: ", err)
+	}
+	defer dst.Close()
+	data := []byte(input)
+	_, err = dst.Write(data)
+	if err != nil {
+		log.Println("cannot write data to file: ", err)
+	}
+}
+
+func mkdir(dir string) {
+	if _, err := os.Stat(dir); err != nil {
+		if err := os.Mkdir(dir, 0666); err != nil {
+			log.Println("cannot make new dir: ", err)
+		}
+	}
 }

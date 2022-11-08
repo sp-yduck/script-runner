@@ -3,12 +3,30 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 
 	"gopkg.in/yaml.v2"
 )
+
+func copyFile(srcPath string, dstPath string) {
+	src, err := os.Open(srcPath)
+	if err != nil {
+		log.Println("cannot open file: ", err)
+	}
+	defer src.Close()
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		log.Println("cannot create new file: ", err)
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		log.Println("cannot copy file: ", err)
+	}
+}
 
 // run single script
 func runScript(name string) (err error) {
