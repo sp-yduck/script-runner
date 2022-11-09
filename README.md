@@ -18,8 +18,7 @@ export_output: KUBECTL
 
 A Pipeline consists of a series of Tasks.
 If you register a output with `export_output` field, you can use that output as env variable in only same Pipeline.
-If you are going to run multiple Pipelines, your Pipelines need to be independent from other Pipelines.
-<!-- so that ScriptRunner can run multiple Pipelines in parallel -->
+If you are going to run multiple Pipelines, your Pipelines need to be independent from other Pipelines so that ScriptRunner can run multiple Pipelines in parallel.
 
 ```sample Pipeline
 # Pipeline has a name and series of Tasks
@@ -44,11 +43,13 @@ go run main.go
 
 ## Roadmap
 - [x] run multiple pipelines in parallel
+- [ ] env var for pipeline
+- [ ] run same pipeline with different variable in parallel
 - [ ] save output in files & reduce std output
 - [x] add timeout feature
 - [ ] be able to configure running parameters by config file (e.g. log level, timeout)
 - [x] output log to files
 - [ ] enrich log information (e.g. struct, log level)
-- [ ] add more feature to Tasks/Pipelines (e.g. ignore_error)
+- [ ] add more feature to Tasks/Pipelines (e.g. ignore_error, when)
 - [x] register output to variables
 - [ ] become a CLI
