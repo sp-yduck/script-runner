@@ -1,0 +1,8 @@
+- name: example pipeline
+  with_items:
+  - red
+  - blue
+  - yellow
+  tasks:
+  - name: echo parallel items
+    command: echo "hello $ITEM !!"

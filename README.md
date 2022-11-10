@@ -43,8 +43,8 @@ go run main.go
 
 ## Roadmap
 - [x] run multiple pipelines in parallel
-- [ ] env var for pipeline
-- [ ] run same pipeline with different variable in parallel
+- [x] env var for pipeline
+- [x] run same pipeline with different variable in parallel
 - [ ] save output in files & reduce std output
 - [x] add timeout feature
 - [ ] be able to configure running parameters by config file (e.g. log level, timeout)

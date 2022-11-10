@@ -1,0 +1,14 @@
+========== pipeline | example pipeline 2 ==========
+
+----- task | hello world script -----
+    command: ./scripts/hello_world.sh
+    output: hello world!! hello world!! hello world!!
+    exit status: 0
+
+----- task | fail task -----
+    command: kubectl get node
+    output: 
+    exit status: 1
+    stderr: I1110 22:44:44.752547    5923 versioner.go:58] invalid configuration: no configuration has been provided
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+    err: exit status 1

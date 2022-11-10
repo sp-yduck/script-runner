@@ -1,0 +1,29 @@
+========== pipeline | example pipeline ==========
+
+----- task | check kubectl path -----
+    command: which kubectl
+    output: /mnt/c/Users/sudot/AppData/Local/Programs/Rancher Desktop/resources/resources/linux/bin/kubectl
+    exit status: 0
+
+----- task | echo kubectl path -----
+    command: echo $KUBECTL
+    output: /mnt/c/Users/sudot/AppData/Local/Programs/Rancher Desktop/resources/resources/linux/bin/kubectl
+    exit status: 0
+
+----- task | helm -----
+    command: which helm
+    output: /mnt/c/Users/sudot/AppData/Local/Programs/Rancher Desktop/resources/resources/linux/bin/helm
+    exit status: 0
+
+----- task | echo kubectl path -----
+    command: echo $KUBECTL
+    output: /mnt/c/Users/sudot/AppData/Local/Programs/Rancher Desktop/resources/resources/linux/bin/kubectl
+    exit status: 0
+
+----- task | fail task -----
+    command: kubectl get node
+    output: 
+    exit status: 1
+    stderr: I1110 22:44:44.770759    5932 versioner.go:58] invalid configuration: no configuration has been provided
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+    err: exit status 1

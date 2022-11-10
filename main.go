@@ -27,8 +27,8 @@ func main() {
 		log.Fatalf("cannot read directory '%s': %v\n", baseDir, err)
 	}
 
-	// read pipelines
-	var pipelines []Pipeline
+	// read parallel pipelines
+	var pps []ParallelPipeline
 	for _, f := range files {
 		log.Println(f.Name())
 		relScriptPath := filepath.Join(baseDir, f.Name())
@@ -37,23 +37,10 @@ func main() {
 			fmt.Println("cannot get absolution path: ", err)
 			log.Fatal("cannot get absolution path: ", err)
 		}
-		pipeline := readPipelines(absScriptPath)
-		pipelines = append(pipelines, pipeline...)
+		pp := readParallelPipelines(absScriptPath)
+		pps = append(pps, pp...)
 	}
 
-	// run pipelines
-	ch := make(chan error, len(pipelines))
-	defer close(ch)
-	for _, p := range pipelines {
-		go func(p Pipeline) {
-			ch <- p.Run()
-		}(p)
-	}
-
-	// to do: get result in order for finished pipeline
-	for _, p := range pipelines {
-		if err := <-ch; err != nil {
-			log.Println(fmt.Sprintf("pipeline(%s) failed: ", p.Name), err)
-		}
-	}
+	pipelines := toPipelinesFromPPS(pps)
+	ParallelRun(pipelines)
 }

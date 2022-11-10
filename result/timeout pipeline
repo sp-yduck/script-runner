@@ -1,0 +1,13 @@
+========== pipeline | timeout pipeline ==========
+
+----- task | 2 sec timeout -----
+    command: sleep $ITEM
+    output: 
+    exit status: -1
+[ERROR] this task has been killed due to exeeding timout (2 seconds)
+
+----- task | 5 sec timeout -----
+    command: sleep $ITEM
+    output: 
+    exit status: -1
+[ERROR] this task has been killed due to exeeding timout (5 seconds)

@@ -1,49 +1,13 @@
-- name: example pipeline
+- name: timeout pipeline
+  with_items:
+  - 1
+  - 5
+  - 10
   tasks:
-  - name: check kubectl path
-    command: which kubectl
-    export_output: KUBECTL
-
-  - name: echo kubectl path
-    command: echo $KUBECTL
-
-- name: pipeline 2
-  tasks:
-  - name: helm
-    command: which helm
-
-- name: pipeline3
-  tasks:
-  - name: fail task
-    command: echo $KUBECTL
-
-- name: pipeline 4
-  tasks:
-  - name: sleep 10 sec
-    command: sleep 10
+  - name: 2 sec timeout
+    command: sleep $ITEM
     timeout: 2  # will fail after 2 sec
     
-- name: pipeline 5
-  tasks:
-  - name: sleep 30 sec
-    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
-    
-- name: pipeline 5
-  tasks:
-  - name: sleep 30 sec
-    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
-
-- name: pipeline 5
-  tasks:
-  - name: sleep 30 sec
-    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
-
-- name: pipeline 5
-  tasks:
-  - name: sleep 30 sec
-    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
-
-- name: pipeline 5
-  tasks:
-  - name: sleep 30 sec
-    command: sleep 30  # will fail after 10 sec (defautl timeout = 10 sec)
+  - name: 5 sec timeout
+    command: sleep $ITEM
+    timeout: 5  # will fail after 2 sec

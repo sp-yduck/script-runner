@@ -13,8 +13,15 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type ParallelPipeline struct {
+	Name         string   `yaml:"name"`
+	ParallelItem []string `yaml:"with_items,omitempty"`
+	Tasks        []*Task  `yaml:"tasks"`
+}
+
 type Pipeline struct {
 	Name  string  `yaml:"name"`
+	Item  string  `yaml:"with_item"`
 	Tasks []*Task `yaml:"tasks"`
 }
 
@@ -48,9 +55,68 @@ func readPipelines(path string) (pipelines []Pipeline) {
 	return pipelines
 }
 
+// unmarshal parallel pipeline object from filepath
+func readParallelPipelines(path string) (pps []ParallelPipeline) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Println("cannot read file: ", err)
+		log.Fatal("cannot read file: ", err)
+	}
+	err = yaml.UnmarshalStrict(b, &pps)
+	if err != nil {
+		fmt.Println("cannot unmarshal yaml: ", err)
+		log.Fatal("cannot unmarshal yaml: ", err)
+	}
+	return pps
+}
+
+func (pp *ParallelPipeline) ToPipelines() (pipelines []Pipeline) {
+	if pp.ParallelItem == nil {
+		p := Pipeline{
+			Name:  pp.Name,
+			Tasks: pp.Tasks,
+		}
+		return []Pipeline{p}
+	}
+	for _, item := range pp.ParallelItem {
+		p := Pipeline{
+			Name:  pp.Name,
+			Item:  item,
+			Tasks: pp.Tasks,
+		}
+		pipelines = append(pipelines, p)
+	}
+	return
+}
+
+func toPipelinesFromPPS(pps []ParallelPipeline) (pipelines []Pipeline) {
+	for _, pp := range pps {
+		pipelines = append(pipelines, pp.ToPipelines()...)
+	}
+	return
+}
+
+func ParallelRun(pipelines []Pipeline) {
+	ch := make(chan error, len(pipelines))
+	defer close(ch)
+	for _, p := range pipelines {
+		go func(p Pipeline) {
+			ch <- p.Run()
+		}(p)
+	}
+
+	// to do: get result in order for finished pipeline
+	for _, p := range pipelines {
+		if err := <-ch; err != nil {
+			log.Println(fmt.Sprintf("pipeline(%s) failed: ", p.Name), err)
+		}
+	}
+}
+
 // run single pipeline
 func (p *Pipeline) Run() (err error) {
 	variables := os.Environ()
+	variables = append(variables, fmt.Sprintf("ITEM=%s", p.Item))
 	for _, task := range p.Tasks {
 		// set timeout context & command
 		var scriptCmd *exec.Cmd
@@ -129,6 +195,7 @@ func (task *Task) GetTimeout() (timeout int64) {
 	return
 }
 
+// to do: add item var info
 func (task *Task) Conclude() (summary string) {
 	if task.Result == nil {
 		// this runs if the task was not executed due to a previous task failure
@@ -148,6 +215,7 @@ func (task *Task) Conclude() (summary string) {
 	return summary
 }
 
+// to do: add item var info
 func (p *Pipeline) Conclude() (summary string) {
 	summary = fmt.Sprintf("========== pipeline | %s ==========\n", p.Name)
 	for _, task := range p.Tasks {
